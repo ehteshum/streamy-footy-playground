@@ -1,28 +1,32 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { toast } from '@/lib/toast';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { getAvailableStreams, type StreamData } from '@/data/streams';
 
 interface StreamFormProps {
   onStreamSubmit: (url: string, title: string) => void;
 }
 
 const StreamForm: React.FC<StreamFormProps> = ({ onStreamSubmit }) => {
-  const [url, setUrl] = useState('');
-  const [title, setTitle] = useState('');
+  const [selectedStreamId, setSelectedStreamId] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
+  const availableStreams = getAvailableStreams();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!url) {
-      toast.error('Please enter a stream URL');
+    if (!selectedStreamId) {
+      toast.error('Please select a stream');
       return;
     }
     
-    if (!url.includes('m3u8')) {
-      toast.warning('URL may not be a valid M3U8 stream');
+    const selectedStream = availableStreams.find(stream => stream.id === selectedStreamId);
+    
+    if (!selectedStream) {
+      toast.error('Invalid stream selection');
+      return;
     }
     
     try {
@@ -30,10 +34,8 @@ const StreamForm: React.FC<StreamFormProps> = ({ onStreamSubmit }) => {
       
       // Simulate a network check
       setTimeout(() => {
-        onStreamSubmit(url, title || 'Untitled Stream');
+        onStreamSubmit(selectedStream.url, selectedStream.title);
         toast.success('Stream loaded successfully');
-        setUrl('');
-        setTitle('');
         setIsLoading(false);
       }, 800);
     } catch (error) {
@@ -53,40 +55,43 @@ const StreamForm: React.FC<StreamFormProps> = ({ onStreamSubmit }) => {
       
       <div className="space-y-2">
         <div className="space-y-1">
-          <label htmlFor="stream-url" className="block text-sm font-medium">
-            Stream URL (M3U8)
+          <label htmlFor="stream-selector" className="block text-sm font-medium">
+            Select Stream
           </label>
-          <Input
-            id="stream-url"
-            type="url"
-            placeholder="https://example.com/stream.m3u8"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            className="w-full transition-all duration-300 ease-out focus:ring-2 focus:ring-primary/50"
-            required
-          />
+          <Select 
+            value={selectedStreamId} 
+            onValueChange={setSelectedStreamId}
+          >
+            <SelectTrigger id="stream-selector" className="w-full">
+              <SelectValue placeholder="Select a stream" />
+            </SelectTrigger>
+            <SelectContent>
+              {availableStreams.map(stream => (
+                <SelectItem key={stream.id} value={stream.id}>
+                  {stream.title}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          
+          {selectedStreamId && (
+            <div className="mt-4 p-3 bg-muted rounded-md">
+              <p className="text-sm font-medium">{availableStreams.find(s => s.id === selectedStreamId)?.title}</p>
+              {availableStreams.find(s => s.id === selectedStreamId)?.description && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  {availableStreams.find(s => s.id === selectedStreamId)?.description}
+                </p>
+              )}
+            </div>
+          )}
         </div>
-      </div>
-      
-      <div className="space-y-1">
-        <label htmlFor="stream-title" className="block text-sm font-medium">
-          Stream Title (Optional)
-        </label>
-        <Input
-          id="stream-title"
-          type="text"
-          placeholder="Premier League: Team A vs Team B"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          className="w-full transition-all duration-300 ease-out focus:ring-2 focus:ring-primary/50"
-        />
       </div>
       
       <div className="flex justify-end">
         <Button 
           type="submit" 
           className="btn-hover-effect transition-all duration-300"
-          disabled={isLoading}
+          disabled={isLoading || !selectedStreamId}
         >
           {isLoading ? 'Loading...' : 'Play Stream'}
         </Button>

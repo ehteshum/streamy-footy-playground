@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import Layout from '@/components/Layout';
 import VideoPlayer from '@/components/VideoPlayer';
@@ -48,9 +49,9 @@ const Index = () => {
             <Card className="w-full aspect-video bg-muted/20 flex items-center justify-center rounded-lg shadow-lg overflow-hidden">
               <CardContent className="flex flex-col items-center justify-center p-6 h-full w-full">
                 <div className="text-center space-y-4 max-w-md">
-                  <h2 className="text-2xl font-semibold tracking-tight">Add a Stream to Begin</h2>
+                  <h2 className="text-2xl font-semibold tracking-tight">Select a Stream to Begin</h2>
                   <p className="text-muted-foreground">
-                    Enter an M3U8 stream URL below or select from your recent streams
+                    Choose from the available streams below
                   </p>
                 </div>
               </CardContent>
@@ -62,7 +63,7 @@ const Index = () => {
         <section className="w-full max-w-2xl mx-auto">
           <Tabs defaultValue="add" className="w-full">
             <TabsList className="w-full grid grid-cols-2 mb-6">
-              <TabsTrigger value="add" className="text-sm">Add Stream</TabsTrigger>
+              <TabsTrigger value="add" className="text-sm">Select Stream</TabsTrigger>
               <TabsTrigger value="recent" className="text-sm">Recent Streams</TabsTrigger>
             </TabsList>
             <TabsContent value="add" className="animate-slide-up">

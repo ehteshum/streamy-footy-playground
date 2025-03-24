@@ -3,37 +3,24 @@ import React, { useState } from 'react';
 import Layout from '@/components/Layout';
 import VideoPlayer from '@/components/VideoPlayer';
 import StreamForm from '@/components/StreamForm';
-import RecentStreams from '@/components/RecentStreams';
-import { useStreamHistory, type StreamEntry } from '@/hooks/useStreamHistory';
+import { type StreamEntry } from '@/hooks/useStreamHistory';
 import { Card, CardContent } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/lib/toast';
 
 const Index = () => {
   const [currentStream, setCurrentStream] = useState<string | null>(null);
   const [currentTitle, setCurrentTitle] = useState<string | null>(null);
-  const { streams, addStream, removeStream, clearHistory } = useStreamHistory();
 
   const handleStreamSubmit = (url: string, title: string) => {
     setCurrentStream(url);
     setCurrentTitle(title);
-    addStream(url, title);
+    toast.success(`Loading: ${title}`);
   };
 
   const handleStreamSelect = (stream: StreamEntry) => {
     setCurrentStream(stream.url);
     setCurrentTitle(stream.title);
     toast.success(`Loading: ${stream.title}`);
-  };
-
-  const handleStreamRemove = (id: string) => {
-    removeStream(id);
-    toast.success('Stream removed from history');
-  };
-
-  const handleClearAll = () => {
-    clearHistory();
-    toast.success('Stream history cleared');
   };
 
   return (
@@ -61,31 +48,11 @@ const Index = () => {
 
         {/* Stream Controls Section */}
         <section className="w-full max-w-2xl mx-auto">
-          <Tabs defaultValue="add" className="w-full">
-            <TabsList className="w-full grid grid-cols-2 mb-6">
-              <TabsTrigger value="add" className="text-sm">Select Stream</TabsTrigger>
-              <TabsTrigger value="recent" className="text-sm">Recent Streams</TabsTrigger>
-            </TabsList>
-            <TabsContent value="add" className="animate-slide-up">
-              <Card>
-                <CardContent className="p-6">
-                  <StreamForm onStreamSubmit={handleStreamSubmit} />
-                </CardContent>
-              </Card>
-            </TabsContent>
-            <TabsContent value="recent" className="animate-slide-up">
-              <Card>
-                <CardContent className="p-6">
-                  <RecentStreams 
-                    streams={streams}
-                    onStreamSelect={handleStreamSelect}
-                    onStreamRemove={handleStreamRemove}
-                    onClearAll={handleClearAll}
-                  />
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+          <Card className="animate-slide-up">
+            <CardContent className="p-6">
+              <StreamForm onStreamSubmit={handleStreamSubmit} />
+            </CardContent>
+          </Card>
         </section>
       </div>
     </Layout>

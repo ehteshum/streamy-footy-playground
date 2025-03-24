@@ -9,8 +9,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <div className="min-h-full w-full bg-gradient-to-br from-background to-background/80 flex flex-col">
       <header className="w-full py-6 px-8 animate-fade-in">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <h1 className="text-2xl font-semibold tracking-tight">
+        <div className="max-w-6xl mx-auto flex items-center justify-center">
+          <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent animate-pulse-subtle drop-shadow-sm">
             Stream By Ishmam
           </h1>
         </div>

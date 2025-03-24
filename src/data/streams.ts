@@ -11,8 +11,8 @@ export interface StreamData {
 export const predefinedStreams: StreamData[] = [
   {
     id: "premier-league-1",
-    url: "https://bldcmprod-cdn.toffeelive.com/cdn/live/sony_sports_2_hd/playlist.m3u8",
-    title: "Premier League: Arsenal vs Chelsea",
+    url: "http://103.179.25.147:8181/IPLT20/index.m3u8",
+    title: "T-Sports",
     league: "Premier League",
     description: "English Premier League match"
   },

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -44,6 +45,12 @@ const StreamForm: React.FC<StreamFormProps> = ({ onStreamSubmit }) => {
 
   return (
     <form onSubmit={handleSubmit} className="w-full space-y-4 animate-scale-in">
+      <div className="bg-amber-50 dark:bg-amber-950/20 p-3 rounded-md mb-4 border border-amber-200 dark:border-amber-800">
+        <p className="text-amber-800 dark:text-amber-300 text-sm font-medium">
+          Admin Only Area - Stream Management
+        </p>
+      </div>
+      
       <div className="space-y-2">
         <div className="space-y-1">
           <label htmlFor="stream-url" className="block text-sm font-medium">

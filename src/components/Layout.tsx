@@ -11,11 +11,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <header className="w-full py-6 px-8 animate-fade-in">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <h1 className="text-2xl font-semibold tracking-tight">
-            <span className="text-primary">Stream</span>Footy
+            Stream By Ishmam
           </h1>
-          <div className="space-x-4">
-            <span className="text-sm text-muted-foreground">Modern Football Streaming</span>
-          </div>
         </div>
       </header>
       <main className="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 animate-slide-up">
@@ -23,9 +20,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </main>
       <footer className="w-full py-6 px-8 mt-auto">
         <div className="max-w-6xl mx-auto">
-          <p className="text-xs text-center text-muted-foreground">
-            Created for personal use only. All streams are user-provided.
-          </p>
         </div>
       </footer>
     </div>

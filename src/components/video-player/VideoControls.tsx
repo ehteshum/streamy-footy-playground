@@ -155,6 +155,33 @@ const VideoControls: React.FC<VideoControlsProps> = ({
         </div>
         
         <div className="flex items-center gap-2">
+          {/* Fullscreen-only Hide Controls Button */}
+          {isFullscreen && (
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className={cn(
+                "text-white hover:bg-white/10 rounded-full", 
+                "p-2",
+                "animate-pulse" // Add attention-grabbing animation
+              )}
+              onClick={() => {
+                // Just trigger a click outside to hide controls
+                const event = new MouseEvent('click', {
+                  bubbles: true,
+                  cancelable: true,
+                  view: window
+                });
+                document.dispatchEvent(event);
+              }}
+            >
+              <span className="sr-only">Hide Controls</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 18l6-6-6-6"/>
+              </svg>
+            </Button>
+          )}
+          
           {/* Picture-in-Picture Button */}
           <Button 
             variant="ghost" 

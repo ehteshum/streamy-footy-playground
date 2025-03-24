@@ -301,13 +301,18 @@ export const useVideoPlayer = (streamUrl: string) => {
     if (!container) return;
     
     if (!document.fullscreenElement) {
+      // Enter fullscreen
       container.requestFullscreen().then(() => {
         setIsFullscreen(true);
         
-        // Hide controls after a short delay when entering fullscreen
+        // Immediately start the hide timer
         if (controlsTimerRef.current) {
           window.clearTimeout(controlsTimerRef.current);
         }
+        
+        // Brief flash of controls then hide
+        setIsControlsVisible(true);
+        
         controlsTimerRef.current = window.setTimeout(() => {
           setIsControlsVisible(false);
         }, 1500);
@@ -316,12 +321,10 @@ export const useVideoPlayer = (streamUrl: string) => {
         console.error('Error attempting to enable fullscreen:', error);
       });
     } else {
+      // Exit fullscreen
       document.exitFullscreen().then(() => {
         setIsFullscreen(false);
-        
-        // Always show controls when exiting fullscreen
-        setIsControlsVisible(true);
-        
+        setIsControlsVisible(true); // Always show controls when exiting
       }).catch((error) => {
         console.error('Error attempting to exit fullscreen:', error);
       });
@@ -355,24 +358,59 @@ export const useVideoPlayer = (streamUrl: string) => {
 
   // Handle user interaction for controls
   const handleUserInteraction = () => {
+    // Show controls when user interacts
     setIsControlsVisible(true);
     setIsUserInteracting(true);
     
+    // Clear existing timer
     if (controlsTimerRef.current) {
       window.clearTimeout(controlsTimerRef.current);
       controlsTimerRef.current = null;
     }
     
-    // Hide controls after a delay, using a shorter delay in fullscreen mode
-    const hideDelay = isFullscreen ? 2000 : 3000; // Shorter delay in fullscreen for better viewing experience
+    // Set very short timeout in fullscreen mode
+    const hideDelay = isFullscreen ? 1500 : 3000; // Even shorter delay in fullscreen
     
     controlsTimerRef.current = window.setTimeout(() => {
-      if (!isUserInteracting) {
+      // Force hide controls in fullscreen mode
+      if (isFullscreen) {
+        setIsControlsVisible(false);
+      } else if (!isUserInteracting) {
         setIsControlsVisible(false);
       }
       setIsUserInteracting(false);
     }, hideDelay);
   };
+
+  // Add this effect to monitor fullscreen state changes
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      const isDocumentFullscreen = Boolean(document.fullscreenElement);
+      setIsFullscreen(isDocumentFullscreen);
+      
+      // When entering fullscreen, start a timer to hide controls
+      if (isDocumentFullscreen) {
+        // Hide controls after a short delay
+        if (controlsTimerRef.current) {
+          window.clearTimeout(controlsTimerRef.current);
+        }
+        
+        setIsControlsVisible(true); // Show initially
+        
+        controlsTimerRef.current = window.setTimeout(() => {
+          setIsControlsVisible(false);
+        }, 1500);
+      } else {
+        // When exiting fullscreen, always show controls
+        setIsControlsVisible(true);
+      }
+    };
+    
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, []);
 
   return {
     videoRef,

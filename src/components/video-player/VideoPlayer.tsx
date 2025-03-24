@@ -26,6 +26,7 @@ interface VideoPlayerProps {
 
 const VideoPlayer: React.FC<VideoPlayerProps> = ({ streamUrl, title, className }) => {
   const [showDiagnostics, setShowDiagnostics] = useState(false);
+  const [localControlsVisible, setLocalControlsVisible] = useState(true);
   
   const {
     videoRef,
@@ -48,6 +49,36 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ streamUrl, title, className }
     formatTime,
     handleUserInteraction
   } = useVideoPlayer(streamUrl);
+
+  // Combine the controls visibility state from the hook with our local state
+  const effectiveControlsVisible = isControlsVisible && localControlsVisible;
+
+  // Effect to hide local controls in fullscreen mode
+  useEffect(() => {
+    if (isFullscreen) {
+      // Add a very short timeout to hide our local controls
+      const timer = setTimeout(() => {
+        setLocalControlsVisible(false);
+      }, 1600);
+      
+      return () => clearTimeout(timer);
+    } else {
+      setLocalControlsVisible(true);
+    }
+  }, [isFullscreen]);
+
+  // Handle direct video click to toggle controls in fullscreen
+  const handleVideoAreaClick = (e: React.MouseEvent) => {
+    // Only toggle controls if in fullscreen mode and no other interaction
+    if (isFullscreen) {
+      e.stopPropagation();
+      setLocalControlsVisible(prev => !prev);
+      handleUserInteraction(); // Make sure the main player also knows about the interaction
+    } else {
+      // In normal mode, just toggle play
+      togglePlay();
+    }
+  };
 
   // Log when component gets destroyed - helps track potential memory leaks
   useEffect(() => {
@@ -105,7 +136,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ streamUrl, title, className }
       onTouchEnd={handleUserInteraction}
       onTouchMove={handleUserInteraction}
     >
-      {/* Video Element - Optimized for maximum stability */}
+      {/* Video Element - Now with direct click handler for fullscreen */}
       <video
         ref={videoRef}
         className="w-full h-full object-contain"
@@ -114,7 +145,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ streamUrl, title, className }
         muted={isMuted}
         preload="auto"
         crossOrigin="anonymous"
-        onClick={handleClick}
+        onClick={handleVideoAreaClick}
         onDoubleClick={handleDoubleClick}
         x-webkit-airplay="allow"
         x-webkit-playsinline="true"
@@ -149,12 +180,12 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ streamUrl, title, className }
         </div>
       )}
       
-      {/* Controls Overlay - with better opacity handling for fullscreen */}
+      {/* Controls Overlay - Updated with combined visibility state */}
       <div 
         className={cn(
           "controls-overlay absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/30 transition-opacity duration-300",
           isFullscreen ? "z-40" : "",
-          isControlsVisible ? "opacity-100" : "opacity-0 pointer-events-none"
+          effectiveControlsVisible ? "opacity-100" : "opacity-0 pointer-events-none"
         )}
       >
         {/* Top Bar with Title */}

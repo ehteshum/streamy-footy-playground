@@ -16,7 +16,7 @@ export const predefinedStreams: StreamData[] = [
     league: "Premier League",
     description: "English Premier League match"
   },
-  {
+  /*{
     id: "la-liga-1",
     url: "https://example.com/stream2.m3u8",
     title: "La Liga: Barcelona vs Real Madrid",
@@ -29,7 +29,7 @@ export const predefinedStreams: StreamData[] = [
     title: "Bundesliga: Bayern Munich vs Borussia Dortmund",
     league: "Bundesliga",
     description: "German Bundesliga Der Klassiker"
-  }
+  }*/
 ];
 
 // Function to get all available streams

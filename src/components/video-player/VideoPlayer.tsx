@@ -5,17 +5,6 @@ import VideoError from './VideoError';
 import VideoTitle from './VideoTitle';
 import DiagnosticOverlay from './DiagnosticOverlay';
 import { cn } from '@/lib/utils';
-import BufferingIndicator from './BufferingIndicator';
-import {
-  Play,
-  Pause,
-  Volume2,
-  VolumeX,
-  Maximize,
-  Minimize,
-  PictureInPictureIcon,
-  Settings
-} from 'lucide-react';
 import Spinner from '../Spinner';
 
 interface VideoPlayerProps {
@@ -26,21 +15,6 @@ interface VideoPlayerProps {
 
 const VideoPlayer: React.FC<VideoPlayerProps> = ({ streamUrl, title, className }) => {
   const [showDiagnostics, setShowDiagnostics] = useState(false);
-  const [localControlsVisible, setLocalControlsVisible] = useState(true);
-  const [isInitialLoading, setIsInitialLoading] = useState(true);
-  
-  // Add emergency safety timer to clear initial loading state
-  useEffect(() => {
-    // Safety timeout to ensure we don't get stuck on the loading screen
-    const safetyTimer = setTimeout(() => {
-      if (isInitialLoading) {
-        console.log('Safety timeout: Forcing exit from initial loading state');
-        setIsInitialLoading(false);
-      }
-    }, 6000); // After 6 seconds, force exit the loading state
-    
-    return () => clearTimeout(safetyTimer);
-  }, [isInitialLoading]);
   
   const {
     videoRef,
@@ -64,81 +38,9 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ streamUrl, title, className }
     handleUserInteraction
   } = useVideoPlayer(streamUrl);
 
-  // Combine the controls visibility state from the hook with our local state
-  const effectiveControlsVisible = isControlsVisible && localControlsVisible;
-
-  // Effect to detect when initial buffering is complete - IMPROVED
-  useEffect(() => {
-    // Check if video has started playing or if it has loaded some data
-    const video = videoRef.current;
-    
-    if (isPlaying && isInitialLoading) {
-      console.log('Video started playing - exiting initial loading state');
-      setIsInitialLoading(false);
-    }
-    
-    // Also listen for the canplay event
-    const handleCanPlay = () => {
-      console.log('Video can play - exiting initial loading state');
-      setIsInitialLoading(false);
-    };
-    
-    // And playing event as backup
-    const handlePlaying = () => {
-      console.log('Video playing event - exiting initial loading state');
-      setIsInitialLoading(false);
-    };
-    
-    if (video) {
-      video.addEventListener('canplay', handleCanPlay);
-      video.addEventListener('playing', handlePlaying);
-      
-      return () => {
-        video.removeEventListener('canplay', handleCanPlay);
-        video.removeEventListener('playing', handlePlaying);
-      };
-    }
-  }, [isPlaying, isInitialLoading, videoRef]);
-
-  // Effect to hide local controls in fullscreen mode
-  useEffect(() => {
-    if (isFullscreen) {
-      // Add a very short timeout to hide our local controls
-      const timer = setTimeout(() => {
-        setLocalControlsVisible(false);
-      }, 1600);
-      
-      return () => clearTimeout(timer);
-    } else {
-      setLocalControlsVisible(true);
-    }
-  }, [isFullscreen]);
-
-  // Handle direct video click to toggle controls in fullscreen
-  const handleVideoAreaClick = (e: React.MouseEvent) => {
-    // Only toggle controls if in fullscreen mode and no other interaction
-    if (isFullscreen) {
-      e.stopPropagation();
-      setLocalControlsVisible(prev => !prev);
-      handleUserInteraction(); // Make sure the main player also knows about the interaction
-    } else {
-      // In normal mode, just toggle play
-      togglePlay();
-    }
-  };
-
-  // Log when component gets destroyed - helps track potential memory leaks
-  useEffect(() => {
-    console.log('VideoPlayer mounted with stream:', streamUrl);
-    return () => {
-      console.log('VideoPlayer unmounted, cleaning up resources');
-    };
-  }, [streamUrl]);
-  
-  // Add keyboard shortcut handler
+  // Add keyboard shortcut for diagnostics
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Toggle diagnostics with Alt+D
       if (e.altKey && e.key === 'd') {
         setShowDiagnostics(prev => !prev);
       }
@@ -154,13 +56,8 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ streamUrl, title, className }
   const handleDoubleClick = () => {
     toggleFullscreen();
   };
-  
-  // Single click handler for play/pause toggle
-  const handleClick = () => {
-    togglePlay();
-  };
 
-  // Adapters for VideoControls component to handle type differences
+  // Adapters for VideoControls component
   const handleVolumeChangeAdapter = (e: React.ChangeEvent<HTMLInputElement>) => {
     handleVolumeChange(parseFloat(e.target.value));
   };
@@ -178,10 +75,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ streamUrl, title, className }
         className
       )}
       onMouseMove={handleUserInteraction}
-      onMouseLeave={() => handleUserInteraction()}
       onTouchStart={handleUserInteraction}
-      onTouchEnd={handleUserInteraction}
-      onTouchMove={handleUserInteraction}
     >
       {/* Video Element */}
       <video
@@ -192,33 +86,28 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ streamUrl, title, className }
         muted={isMuted}
         preload="auto"
         crossOrigin="anonymous"
-        onClick={handleVideoAreaClick}
+        onClick={togglePlay}
         onDoubleClick={handleDoubleClick}
-        x-webkit-airplay="allow"
-        x-webkit-playsinline="true"
-        controlsList="nodownload"
+        controls={false}
       >
-        {/* HLS.js handles the source */}
         Your browser does not support the video tag.
       </video>
       
       {/* Diagnostic Overlay */}
-      <DiagnosticOverlay 
-        videoRef={videoRef} 
-        isEnabled={showDiagnostics}
-        playerType={'hls'}
-      />
-      
-      {/* Help text (visible when diagnostics are enabled) */}
       {showDiagnostics && (
-        <div className="fixed bottom-4 left-4 bg-black/70 text-white text-xs p-2 rounded z-50">
-          <div>Alt+D: Toggle diagnostics</div>
-        </div>
+        <DiagnosticOverlay 
+          videoRef={videoRef} 
+          isEnabled={true}
+          playerType={'hls'}
+        />
       )}
       
-      {/* Play button overlay when paused - MODIFIED to bypass initial loading check */}
+      {/* Play button overlay when paused */}
       {!isPlaying && !isBuffering && !isError && (
-        <div className="absolute inset-0 flex items-center justify-center cursor-pointer z-20" onClick={togglePlay}>
+        <div 
+          className="absolute inset-0 flex items-center justify-center cursor-pointer z-20" 
+          onClick={togglePlay}
+        >
           <div className="bg-black/50 rounded-full p-4">
             <svg className="w-12 h-12 text-white" fill="currentColor" viewBox="0 0 24 24">
               <path d="M8 5v14l11-7z" />
@@ -227,23 +116,15 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ streamUrl, title, className }
         </div>
       )}
       
-      {/* Controls Overlay - Updated with combined visibility state */}
+      {/* Controls Overlay */}
       <div 
         className={cn(
-          "controls-overlay absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/30 transition-opacity duration-300",
-          isFullscreen ? "z-40" : "",
-          effectiveControlsVisible ? "opacity-100" : "opacity-0 pointer-events-none"
+          "absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/30 transition-opacity duration-300",
+          isControlsVisible ? "opacity-100" : "opacity-0 pointer-events-none"
         )}
       >
-        {/* Top Bar with Title */}
+        {/* Title */}
         <VideoTitle title={title} />
-        
-        {/* Center Play/Pause Button */}
-        {!isError && (
-          <div className="absolute inset-0 flex items-center justify-center z-10">
-            {/* Don't show anything here */}
-          </div>
-        )}
         
         {/* Video Controls */}
         <VideoControls 
@@ -267,33 +148,12 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ streamUrl, title, className }
       {/* Error Message */}
       {isError && <VideoError />}
       
-      {/* Initial Loading and Buffering indicators - MODIFIED to add a tap to play option */}
-      {isInitialLoading && isBuffering ? (
-        <div 
-          className="absolute inset-0 flex flex-col items-center justify-center z-30 bg-black/60 cursor-pointer"
-          onClick={() => {
-            // Add ability to tap on loading screen to force play
-            console.log('Loading screen tapped - attempting to play');
-            togglePlay();
-            setIsInitialLoading(false);
-          }}
-        >
-          <Spinner className="w-12 h-12" />
-          <div className="mt-4 text-white text-lg font-medium">
-            Preparing Stream
-          </div>
-          <div className="mt-2 text-white/80 text-sm">
-            Tap to play if loading takes too long...
-          </div>
-        </div>
-      ) : isBuffering && !isInitialLoading ? (
-        <div className="absolute inset-0 flex flex-col items-center justify-center z-30 bg-black/40">
+      {/* Buffering indicator */}
+      {isBuffering && (
+        <div className="absolute inset-0 flex items-center justify-center z-30 bg-black/30">
           <Spinner className="w-10 h-10" />
-          <div className="mt-4 text-white text-sm font-medium">
-            Buffering...
-          </div>
         </div>
-      ) : null}
+      )}
     </div>
   );
 };

@@ -2,49 +2,13 @@ import { useState, useRef, useEffect } from 'react';
 import { toast } from '@/lib/toast';
 import Hls from 'hls.js';
 
-// Revised HLS.js config - FIXED FOR IMMEDIATE PLAYBACK
+// Very minimal config to ensure playback works
 const HLS_CONFIG = {
-  // Core settings
+  autoStartLoad: true,
+  startLevel: 0,
   debug: false,
-  enableWorker: true,
-  lowLatencyMode: false,
-  
-  // Buffer settings - balanced approach
-  maxBufferLength: 60,              // Reduced from 120s to 60s for faster start
-  maxMaxBufferLength: 180,          // Reduced from 300s to 180s
-  liveSyncDuration: 3,
-  
-  // Initial loading strategy - CRITICAL FIX
-  startFragPrefetch: true,
-  autoStartLoad: true,              // Changed back to true to ensure loading starts immediately
-  manifestLoadingTimeOut: 20000,
-  manifestLoadingMaxRetry: 4,
-  manifestLoadingRetryDelay: 1000,
-  
-  // Bandwidth detection settings
-  abrEwmaDefaultEstimate: 1000000,
-  abrBandWidthFactor: 0.8,
-  
-  // Quality settings
   capLevelToPlayerSize: true,
-  startLevel: 0,                    // Always start at lowest quality for faster initial load
-  
-  // Recovery settings
-  fragLoadingMaxRetry: 8,
-  levelLoadingMaxRetry: 4,
-  
-  // Buffer management settings
-  maxStarvationDelay: 4,
-  maxLoadingDelay: 4,
-  maxFragLookUpTolerance: 0.25,
-  
-  // Fragment loading behavior
-  fragLoadingRetryDelay: 1000,
-  
-  // XHR settings
-  xhrSetup: function(xhr: XMLHttpRequest) {
-    xhr.timeout = 30000;
-  }
+  maxBufferLength: 30
 };
 
 export const useVideoPlayer = (streamUrl: string) => {
@@ -52,10 +16,6 @@ export const useVideoPlayer = (streamUrl: string) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<Hls | null>(null);
   const controlsTimerRef = useRef<number | null>(null);
-  const bufferCheckIntervalRef = useRef<number | null>(null);
-  const bufferUITimerRef = useRef<number | null>(null);
-  const initialBufferingRef = useRef<boolean>(true);
-  const playbackAttemptRef = useRef<number>(0);
   
   // State
   const [isPlaying, setIsPlaying] = useState(false);
@@ -65,210 +25,85 @@ export const useVideoPlayer = (streamUrl: string) => {
   const [volume, setVolume] = useState(1);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [isBuffering, setIsBuffering] = useState(true); // Start with buffering state
+  const [isBuffering, setIsBuffering] = useState(true);
   const [isError, setIsError] = useState(false);
   const [isControlsVisible, setIsControlsVisible] = useState(true);
   const [isUserInteracting, setIsUserInteracting] = useState(false);
-
-  // Function to delay showing buffering UI to avoid flickering
-  const showBufferingWithDelay = (show: boolean) => {
-    if (bufferUITimerRef.current) {
-      window.clearTimeout(bufferUITimerRef.current);
-      bufferUITimerRef.current = null;
-    }
-    
-    if (show) {
-      // Only show buffering UI after a delay to avoid flickering
-      // Use shorter delay for initial buffering
-      const delay = initialBufferingRef.current ? 200 : 1000;
-      bufferUITimerRef.current = window.setTimeout(() => {
-        setIsBuffering(true);
-      }, delay);
-    } else {
-      // Mark initial buffering as complete once we hide buffering UI
-      initialBufferingRef.current = false;
-      // Hide immediately
-      setIsBuffering(false);
-    }
-  };
-
-  // Function to check buffer level
-  const checkBufferLevel = () => {
-    const video = videoRef.current;
-    if (!video) return 0;
-    
-    // Calculate current buffer
-    let currentBuffer = 0;
-    if (video.buffered.length > 0) {
-      const buffered = video.buffered;
-      const currentTime = video.currentTime;
-      
-      for (let i = 0; i < buffered.length; i++) {
-        if (currentTime >= buffered.start(i) && currentTime <= buffered.end(i)) {
-          currentBuffer = buffered.end(i) - currentTime;
-          break;
-        }
-      }
-    }
-    
-    return currentBuffer;
-  };
-
-  // Function to check if we've buffered enough to start playback
-  const hasBufferedEnoughToPlay = () => {
-    const bufferLevel = checkBufferLevel();
-    // IMPORTANT FIX: Reduced buffer requirements
-    const requiredBuffer = initialBufferingRef.current ?
-      3 : // Only require 3 seconds for initial playback (down from 8)
-      0.5; // Still only 0.5 seconds for continued playback
-    
-    return bufferLevel >= requiredBuffer;
-  };
-
-  // Function to attempt playback when buffered enough
-  const attemptPlayback = () => {
-    const video = videoRef.current;
-    if (!video) return;
-    
-    // IMPORTANT FIX: Remove the check for hasBufferedEnoughToPlay() to ensure playback starts
-    playbackAttemptRef.current += 1;
-    console.log(`Attempt ${playbackAttemptRef.current}: Starting playback with ${checkBufferLevel().toFixed(1)}s buffer`);
-    
-    video.play().then(() => {
-      setIsPlaying(true);
-      showBufferingWithDelay(false);
-    }).catch((error) => {
-      console.error('Error playing video:', error);
-      // If autoplay fails, we'll need user interaction
-    });
-  };
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video || !streamUrl) return;
     
-    // Show buffering indicator immediately for initial load
-    showBufferingWithDelay(true);
-    
     // Create HLS instance if browser supports it
     if (Hls.isSupported()) {
-      // Create new HLS instance
+      console.log('Using HLS.js to play video');
+      
+      // Clean up any existing instance
+      if (hlsRef.current) {
+        hlsRef.current.destroy();
+      }
+      
+      // Create new instance
       const hls = new Hls(HLS_CONFIG);
       hlsRef.current = hls;
       
-      // Load source and attach to video
-      hls.loadSource(streamUrl);
-      hls.attachMedia(video);
-      
-      // Event listeners
-      hls.on(Hls.Events.MEDIA_ATTACHED, () => {
-        console.log('HLS media attached');
-      });
-      
-      hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        console.log('HLS manifest parsed');
-        
-        // Force lowest quality for initial load
-        hls.startLevel = 0;
-        
-        // IMPORTANT FIX: Set a very short timeout to attempt playback immediately
-        setTimeout(() => {
-          if (initialBufferingRef.current) {
-            console.log('Attempting immediate playback');
-            attemptPlayback();
-          }
-        }, 1000); // Try to play after just 1 second
-        
-        // IMPORTANT FIX: Also set a safety timeout to ensure playback happens
-        setTimeout(() => {
-          if (!isPlaying && initialBufferingRef.current) {
-            console.log('Emergency playback after 4s timeout');
-            attemptPlayback();
-          }
-        }, 4000); // Emergency playback after 4 seconds
-      });
-      
-      hls.on(Hls.Events.LEVEL_SWITCHED, (event, data) => {
-        console.log(`Quality level switched to ${data.level}`);
-      });
-      
+      // Basic error handling
       hls.on(Hls.Events.ERROR, (event, data) => {
+        console.error('HLS error:', data);
         if (data.fatal) {
           switch (data.type) {
             case Hls.ErrorTypes.NETWORK_ERROR:
-              console.error('Network error:', data);
-              // Try to recover
-              hls.startLoad();
+              hls.startLoad(); // Try to recover
               break;
             case Hls.ErrorTypes.MEDIA_ERROR:
-              console.error('Media error:', data);
-              // Try to recover
-              hls.recoverMediaError();
+              hls.recoverMediaError(); // Try to recover
               break;
             default:
-              // Fatal error, try to destroy and recreate
-              hls.destroy();
-              setIsError(true);
+              setIsError(true); // Can't recover
               break;
           }
         }
       });
       
-      // Set up buffer check interval - OPTIMIZED
-      bufferCheckIntervalRef.current = window.setInterval(() => {
-        if (!video.paused) {
-          const bufferLevel = checkBufferLevel();
-          
-          // Only show buffering UI if buffer is critically low and we're playing
-          if (bufferLevel < 0.5 && isPlaying) {
-            showBufferingWithDelay(true);
-          } else if (bufferLevel >= 2.0) {
-            showBufferingWithDelay(false);
-          }
-          
-          // Log buffer every 5 seconds for debugging
-          if (Math.floor(video.currentTime) % 5 === 0 && Math.floor(video.currentTime) > 0) {
-            console.log(`Buffer level: ${bufferLevel.toFixed(2)}s`);
-          }
-        }
-      }, 1000);
-    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-      // For browsers that support HLS natively (Safari)
-      video.src = streamUrl;
+      // Set up video
+      hls.loadSource(streamUrl);
+      hls.attachMedia(video);
       
-      video.addEventListener('loadedmetadata', () => {
-        // For Safari, we need to wait for more data before playing
-        video.addEventListener('canplay', () => {
-          if (initialBufferingRef.current) {
-            attemptPlayback();
-          }
-        }, { once: true });
+      // Try to play as soon as possible
+      hls.on(Hls.Events.MANIFEST_PARSED, () => {
+        console.log('Manifest parsed, attempting to play');
+        video.play().catch(error => {
+          console.error('Error playing video:', error);
+          // Most browsers require user interaction for autoplay
+        });
       });
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      // For Safari which has native HLS support
+      console.log('Using native HLS support');
+      video.src = streamUrl;
+      video.addEventListener('loadedmetadata', () => {
+        video.play().catch(error => {
+          console.error('Error playing video:', error);
+        });
+      });
+    } else {
+      console.error('HLS is not supported by your browser');
+      setIsError(true);
     }
     
-    // Event listeners
+    // Event listeners for state changes
     const handlePlay = () => setIsPlaying(true);
     const handlePause = () => setIsPlaying(false);
-    const handleTimeUpdate = () => {
-      setCurrentTime(video.currentTime);
-    };
-    const handleDurationChange = () => {
-      setDuration(video.duration);
-    };
+    const handleTimeUpdate = () => setCurrentTime(video.currentTime);
+    const handleDurationChange = () => setDuration(video.duration);
     const handleVolumeChange = () => {
       setVolume(video.volume);
       setIsMuted(video.muted);
     };
-    const handleWaiting = () => {
-      // Only show buffering if we have less than 1 second of buffer
-      if (checkBufferLevel() < 1) {
-        showBufferingWithDelay(true);
-      }
-    };
-    const handlePlaying = () => {
-      showBufferingWithDelay(false);
-    };
+    const handleWaiting = () => setIsBuffering(true);
+    const handlePlaying = () => setIsBuffering(false);
     
+    // Add event listeners
     video.addEventListener('play', handlePlay);
     video.addEventListener('pause', handlePause);
     video.addEventListener('timeupdate', handleTimeUpdate);
@@ -279,6 +114,7 @@ export const useVideoPlayer = (streamUrl: string) => {
     
     // Clean up
     return () => {
+      // Remove event listeners
       video.removeEventListener('play', handlePlay);
       video.removeEventListener('pause', handlePause);
       video.removeEventListener('timeupdate', handleTimeUpdate);
@@ -287,22 +123,19 @@ export const useVideoPlayer = (streamUrl: string) => {
       video.removeEventListener('waiting', handleWaiting);
       video.removeEventListener('playing', handlePlaying);
       
-      if (bufferCheckIntervalRef.current) {
-        window.clearInterval(bufferCheckIntervalRef.current);
-        bufferCheckIntervalRef.current = null;
-      }
-      
-      if (bufferUITimerRef.current) {
-        window.clearTimeout(bufferUITimerRef.current);
-        bufferUITimerRef.current = null;
-      }
-      
+      // Clean up HLS
       if (hlsRef.current) {
         hlsRef.current.destroy();
         hlsRef.current = null;
       }
+      
+      // Clear timers
+      if (controlsTimerRef.current) {
+        window.clearTimeout(controlsTimerRef.current);
+        controlsTimerRef.current = null;
+      }
     };
-  }, [streamUrl, isPlaying]);
+  }, [streamUrl]);
 
   // Toggle play/pause
   const togglePlay = () => {
@@ -351,34 +184,31 @@ export const useVideoPlayer = (streamUrl: string) => {
       // Enter fullscreen
       container.requestFullscreen().then(() => {
         setIsFullscreen(true);
+        setIsControlsVisible(true);
         
-        // Immediately start the hide timer
+        // Hide controls after a delay
         if (controlsTimerRef.current) {
           window.clearTimeout(controlsTimerRef.current);
         }
         
-        // Brief flash of controls then hide
-        setIsControlsVisible(true);
-        
         controlsTimerRef.current = window.setTimeout(() => {
           setIsControlsVisible(false);
-        }, 1500);
-        
+        }, 3000);
       }).catch((error) => {
-        console.error('Error attempting to enable fullscreen:', error);
+        console.error('Error entering fullscreen:', error);
       });
     } else {
       // Exit fullscreen
       document.exitFullscreen().then(() => {
         setIsFullscreen(false);
-        setIsControlsVisible(true); // Always show controls when exiting
+        setIsControlsVisible(true);
       }).catch((error) => {
-        console.error('Error attempting to exit fullscreen:', error);
+        console.error('Error exiting fullscreen:', error);
       });
     }
   };
 
-  // Toggle picture in picture
+  // Toggle picture-in-picture
   const togglePictureInPicture = async () => {
     const video = videoRef.current;
     if (!video) return;
@@ -392,7 +222,7 @@ export const useVideoPlayer = (streamUrl: string) => {
         setIsPiP(true);
       }
     } catch (error) {
-      console.error('Error toggling picture in picture:', error);
+      console.error('Error toggling picture-in-picture:', error);
     }
   };
 
@@ -405,52 +235,25 @@ export const useVideoPlayer = (streamUrl: string) => {
 
   // Handle user interaction for controls
   const handleUserInteraction = () => {
-    // Show controls when user interacts
     setIsControlsVisible(true);
     setIsUserInteracting(true);
     
-    // Clear existing timer
     if (controlsTimerRef.current) {
       window.clearTimeout(controlsTimerRef.current);
-      controlsTimerRef.current = null;
     }
     
-    // Set very short timeout in fullscreen mode
-    const hideDelay = isFullscreen ? 1500 : 3000; // Even shorter delay in fullscreen
-    
     controlsTimerRef.current = window.setTimeout(() => {
-      // Force hide controls in fullscreen mode
-      if (isFullscreen) {
-        setIsControlsVisible(false);
-      } else if (!isUserInteracting) {
+      if (isFullscreen && !isUserInteracting) {
         setIsControlsVisible(false);
       }
       setIsUserInteracting(false);
-    }, hideDelay);
+    }, isFullscreen ? 3000 : 5000);
   };
 
-  // Add this effect to monitor fullscreen state changes
+  // Monitor fullscreen changes
   useEffect(() => {
     const handleFullscreenChange = () => {
-      const isDocumentFullscreen = Boolean(document.fullscreenElement);
-      setIsFullscreen(isDocumentFullscreen);
-      
-      // When entering fullscreen, start a timer to hide controls
-      if (isDocumentFullscreen) {
-        // Hide controls after a short delay
-        if (controlsTimerRef.current) {
-          window.clearTimeout(controlsTimerRef.current);
-        }
-        
-        setIsControlsVisible(true); // Show initially
-        
-        controlsTimerRef.current = window.setTimeout(() => {
-          setIsControlsVisible(false);
-        }, 1500);
-      } else {
-        // When exiting fullscreen, always show controls
-        setIsControlsVisible(true);
-      }
+      setIsFullscreen(Boolean(document.fullscreenElement));
     };
     
     document.addEventListener('fullscreenchange', handleFullscreenChange);

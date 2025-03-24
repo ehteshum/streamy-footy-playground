@@ -2,36 +2,36 @@ import { useState, useRef, useEffect } from 'react';
 import { toast } from '@/lib/toast';
 import Hls from 'hls.js';
 
-// Improved HLS.js config - focused on maximizing buffer for smooth playback
+// Improved HLS.js config - focused on initial buffer and smooth startup
 const HLS_CONFIG = {
   // Core settings
   debug: false,                     // Disable debug for production
   enableWorker: true,               // Use web workers for better performance
   lowLatencyMode: false,            // Disable low latency mode for stability
   
-  // Buffer settings - GREATLY INCREASED
-  maxBufferLength: 90,              // Massive increase to 90s buffer length
-  maxMaxBufferLength: 180,          // Allow up to 3 minutes of buffer in good conditions
+  // Buffer settings - GREATLY INCREASED for initial load
+  maxBufferLength: 120,             // Massive increase to 120s buffer length
+  maxMaxBufferLength: 300,          // Allow up to 5 minutes of buffer in good conditions
   liveSyncDuration: 3,              // Only necessary for live streams
   
-  // Initial loading behavior
-  startFragPrefetch: true,          // Prefetch initial fragments
-  autoStartLoad: true,              // Start loading automatically
+  // Initial loading strategy - OPTIMIZED FOR FASTER START
+  startFragPrefetch: true,          // Prefetch initial fragments for faster start
+  autoStartLoad: false,             // We'll manually control loading for better startup
   manifestLoadingTimeOut: 20000,    // 20s timeout for manifest loading
   manifestLoadingMaxRetry: 4,       // Reasonable retries for manifest loading
   manifestLoadingRetryDelay: 1000,  // 1s delay between manifest retries
   
-  // Bandwidth detection settings - MORE CONSERVATIVE
+  // Bandwidth detection settings - CONSERVATIVE FOR FIRST LOAD
   abrEwmaDefaultEstimate: 1000000,  // Start with 1Mbps estimate
-  abrBandWidthFactor: 0.75,         // Use 75% of detected bandwidth
+  abrBandWidthFactor: 0.8,          // Use 80% of detected bandwidth (more reasonable)
   
   // Quality settings
   capLevelToPlayerSize: true,       // Limit quality based on player size
-  startLevel: 0,                    // Always start at lowest quality (more reliable)
+  startLevel: 0,                    // Start at lowest quality for faster initial load
   
-  // Recovery settings - more balanced
-  fragLoadingMaxRetry: 8,           // More retries for fragments
-  levelLoadingMaxRetry: 4,          // Reasonable retries for levels
+  // Recovery settings - more aggressive
+  fragLoadingMaxRetry: 10,          // More retries for fragments
+  levelLoadingMaxRetry: 8,          // More retries for levels
   
   // Critical buffer management settings
   maxStarvationDelay: 4,            // More balanced starvation delay
@@ -39,7 +39,7 @@ const HLS_CONFIG = {
   maxFragLookUpTolerance: 0.25,     // More precise fragment lookup  
   
   // Fragment loading behavior
-  fragLoadingRetryDelay: 1000,      // 1s between retries
+  fragLoadingRetryDelay: 500,       // 500ms between retries (faster for initial load)
   
   // XHR settings with increased timeout
   xhrSetup: function(xhr: XMLHttpRequest) {
@@ -54,6 +54,8 @@ export const useVideoPlayer = (streamUrl: string) => {
   const controlsTimerRef = useRef<number | null>(null);
   const bufferCheckIntervalRef = useRef<number | null>(null);
   const bufferUITimerRef = useRef<number | null>(null);
+  const initialBufferingRef = useRef<boolean>(true);
+  const playbackAttemptRef = useRef<number>(0);
   
   // State
   const [isPlaying, setIsPlaying] = useState(false);
@@ -63,7 +65,7 @@ export const useVideoPlayer = (streamUrl: string) => {
   const [volume, setVolume] = useState(1);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [isBuffering, setIsBuffering] = useState(false);
+  const [isBuffering, setIsBuffering] = useState(true); // Start with buffering state
   const [isError, setIsError] = useState(false);
   const [isControlsVisible, setIsControlsVisible] = useState(true);
   const [isUserInteracting, setIsUserInteracting] = useState(false);
@@ -76,11 +78,15 @@ export const useVideoPlayer = (streamUrl: string) => {
     }
     
     if (show) {
-      // Only show buffering UI after a 1000ms delay to avoid flickering
+      // Only show buffering UI after a delay to avoid flickering
+      // Use shorter delay for initial buffering
+      const delay = initialBufferingRef.current ? 200 : 1000;
       bufferUITimerRef.current = window.setTimeout(() => {
         setIsBuffering(true);
-      }, 1000);
+      }, delay);
     } else {
+      // Mark initial buffering as complete once we hide buffering UI
+      initialBufferingRef.current = false;
       // Hide immediately
       setIsBuffering(false);
     }
@@ -108,9 +114,40 @@ export const useVideoPlayer = (streamUrl: string) => {
     return currentBuffer;
   };
 
+  // Function to check if we've buffered enough to start playback
+  const hasBufferedEnoughToPlay = () => {
+    const bufferLevel = checkBufferLevel();
+    // During initial load, require more buffer to ensure smooth playback
+    const requiredBuffer = initialBufferingRef.current ?
+      8 : // Require 8 seconds for initial playback
+      0.5; // But only 0.5 seconds for continued playback
+    
+    return bufferLevel >= requiredBuffer;
+  };
+
+  // Function to attempt playback when buffered enough
+  const attemptPlayback = () => {
+    const video = videoRef.current;
+    if (!video || isPlaying || !hasBufferedEnoughToPlay()) return;
+    
+    playbackAttemptRef.current += 1;
+    console.log(`Attempt ${playbackAttemptRef.current}: Starting playback with ${checkBufferLevel().toFixed(1)}s buffer`);
+    
+    video.play().then(() => {
+      setIsPlaying(true);
+      showBufferingWithDelay(false);
+    }).catch((error) => {
+      console.error('Error playing video:', error);
+      // If autoplay fails, we'll wait for user interaction
+    });
+  };
+
   useEffect(() => {
     const video = videoRef.current;
     if (!video || !streamUrl) return;
+    
+    // Show buffering indicator immediately for initial load
+    showBufferingWithDelay(true);
     
     // Create HLS instance if browser supports it
     if (Hls.isSupported()) {
@@ -126,24 +163,55 @@ export const useVideoPlayer = (streamUrl: string) => {
       hls.on(Hls.Events.MEDIA_ATTACHED, () => {
         console.log('HLS media attached');
         
-        // Start loading
+        // Start loading manually for better control
         hls.loadSource(streamUrl);
       });
       
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
         console.log('HLS manifest parsed');
         
-        // Force lowest quality for initial load
+        // Force lowest quality for initial load for faster startup
         hls.startLevel = 0;
+        hls.currentLevel = 0;
         
-        // Attempt to play
-        video.play().then(() => {
-          setIsPlaying(true);
-          showBufferingWithDelay(false);
-        }).catch((error) => {
-          console.error('Error playing video:', error);
-          // User may need to interact first
-        });
+        // Manually start loading
+        hls.startLoad(-1); // Start loading from the beginning
+        
+        // Set up aggressive buffer checking for initial load
+        const checkInitialBuffer = () => {
+          const bufferLevel = checkBufferLevel();
+          console.log(`Initial buffer: ${bufferLevel.toFixed(1)}s`);
+          
+          // Once we have enough buffer, start playback
+          if (bufferLevel >= 8) {
+            // We have enough buffer, start playback
+            attemptPlayback();
+            return true; // Signal to stop checking
+          }
+          
+          return false; // Continue checking
+        };
+        
+        // Check buffer aggressively at first
+        const initialBufferCheckInterval = setInterval(() => {
+          if (checkInitialBuffer()) {
+            clearInterval(initialBufferCheckInterval);
+          }
+        }, 500); // Check every 500ms
+        
+        // Safety timeout to start playback even with less buffer
+        setTimeout(() => {
+          clearInterval(initialBufferCheckInterval);
+          
+          if (!isPlaying && initialBufferingRef.current) {
+            console.log('Starting playback after timeout with buffer:', checkBufferLevel());
+            attemptPlayback();
+          }
+        }, 8000); // Wait max 8 seconds before starting anyway
+      });
+      
+      hls.on(Hls.Events.LEVEL_SWITCHED, (event, data) => {
+        console.log(`Quality level switched to ${data.level}`);
       });
       
       hls.on(Hls.Events.ERROR, (event, data) => {
@@ -181,7 +249,7 @@ export const useVideoPlayer = (streamUrl: string) => {
           }
           
           // Log buffer every 5 seconds for debugging
-          if (Math.floor(video.currentTime) % 5 === 0) {
+          if (Math.floor(video.currentTime) % 5 === 0 && Math.floor(video.currentTime) > 0) {
             console.log(`Buffer level: ${bufferLevel.toFixed(2)}s`);
           }
         }
@@ -191,11 +259,12 @@ export const useVideoPlayer = (streamUrl: string) => {
       video.src = streamUrl;
       
       video.addEventListener('loadedmetadata', () => {
-        video.play().then(() => {
-          setIsPlaying(true);
-        }).catch((error) => {
-          console.error('Error playing video:', error);
-        });
+        // For Safari, we need to wait for more data before playing
+        video.addEventListener('canplay', () => {
+          if (initialBufferingRef.current) {
+            attemptPlayback();
+          }
+        }, { once: true });
       });
     }
     
@@ -255,7 +324,7 @@ export const useVideoPlayer = (streamUrl: string) => {
         hlsRef.current = null;
       }
     };
-  }, [streamUrl]);
+  }, [streamUrl, isPlaying]);
 
   // Toggle play/pause
   const togglePlay = () => {

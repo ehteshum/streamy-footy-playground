@@ -27,6 +27,7 @@ interface VideoPlayerProps {
 const VideoPlayer: React.FC<VideoPlayerProps> = ({ streamUrl, title, className }) => {
   const [showDiagnostics, setShowDiagnostics] = useState(false);
   const [localControlsVisible, setLocalControlsVisible] = useState(true);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   
   const {
     videoRef,
@@ -52,6 +53,13 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ streamUrl, title, className }
 
   // Combine the controls visibility state from the hook with our local state
   const effectiveControlsVisible = isControlsVisible && localControlsVisible;
+
+  // Effect to detect when initial buffering is complete
+  useEffect(() => {
+    if (isPlaying && isInitialLoading) {
+      setIsInitialLoading(false);
+    }
+  }, [isPlaying, isInitialLoading]);
 
   // Effect to hide local controls in fullscreen mode
   useEffect(() => {
@@ -170,7 +178,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ streamUrl, title, className }
       )}
       
       {/* Play button overlay when paused */}
-      {!isPlaying && !isBuffering && !isError && (
+      {!isPlaying && !isBuffering && !isError && !isInitialLoading && (
         <div className="absolute inset-0 flex items-center justify-center cursor-pointer z-20" onClick={togglePlay}>
           <div className="bg-black/50 rounded-full p-4">
             <svg className="w-12 h-12 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -220,15 +228,25 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ streamUrl, title, className }
       {/* Error Message */}
       {isError && <VideoError />}
       
-      {/* Buffering indicator - improved to be less flickery */}
-      {isBuffering && (
+      {/* Initial Loading and Buffering indicators */}
+      {isInitialLoading && isBuffering ? (
+        <div className="absolute inset-0 flex flex-col items-center justify-center z-30 bg-black/60">
+          <Spinner className="w-12 h-12" />
+          <div className="mt-4 text-white text-lg font-medium">
+            Preparing Stream
+          </div>
+          <div className="mt-2 text-white/80 text-sm">
+            Buffering optimal content for smooth playback...
+          </div>
+        </div>
+      ) : isBuffering && !isInitialLoading ? (
         <div className="absolute inset-0 flex flex-col items-center justify-center z-30 bg-black/40">
           <Spinner className="w-10 h-10" />
           <div className="mt-4 text-white text-sm font-medium">
             Buffering...
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
 };

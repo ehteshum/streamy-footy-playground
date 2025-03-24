@@ -303,12 +303,25 @@ export const useVideoPlayer = (streamUrl: string) => {
     if (!document.fullscreenElement) {
       container.requestFullscreen().then(() => {
         setIsFullscreen(true);
+        
+        // Hide controls after a short delay when entering fullscreen
+        if (controlsTimerRef.current) {
+          window.clearTimeout(controlsTimerRef.current);
+        }
+        controlsTimerRef.current = window.setTimeout(() => {
+          setIsControlsVisible(false);
+        }, 1500);
+        
       }).catch((error) => {
         console.error('Error attempting to enable fullscreen:', error);
       });
     } else {
       document.exitFullscreen().then(() => {
         setIsFullscreen(false);
+        
+        // Always show controls when exiting fullscreen
+        setIsControlsVisible(true);
+        
       }).catch((error) => {
         console.error('Error attempting to exit fullscreen:', error);
       });
@@ -347,14 +360,18 @@ export const useVideoPlayer = (streamUrl: string) => {
     
     if (controlsTimerRef.current) {
       window.clearTimeout(controlsTimerRef.current);
+      controlsTimerRef.current = null;
     }
+    
+    // Hide controls after a delay, using a shorter delay in fullscreen mode
+    const hideDelay = isFullscreen ? 2000 : 3000; // Shorter delay in fullscreen for better viewing experience
     
     controlsTimerRef.current = window.setTimeout(() => {
       if (!isUserInteracting) {
         setIsControlsVisible(false);
       }
       setIsUserInteracting(false);
-    }, 3000);
+    }, hideDelay);
   };
 
   return {

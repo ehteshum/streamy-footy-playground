@@ -96,11 +96,14 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ streamUrl, title, className }
       id="video-container"
       className={cn(
         "relative w-full h-full aspect-video bg-black rounded-lg overflow-hidden shadow-lg",
+        isFullscreen ? "fixed inset-0 z-50" : "",
         className
       )}
       onMouseMove={handleUserInteraction}
       onMouseLeave={() => handleUserInteraction()}
       onTouchStart={handleUserInteraction}
+      onTouchEnd={handleUserInteraction}
+      onTouchMove={handleUserInteraction}
     >
       {/* Video Element - Optimized for maximum stability */}
       <video
@@ -146,9 +149,13 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ streamUrl, title, className }
         </div>
       )}
       
-      {/* Controls Overlay */}
+      {/* Controls Overlay - with better opacity handling for fullscreen */}
       <div 
-        className={`controls-overlay absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/30 transition-opacity duration-300 ${isControlsVisible ? 'opacity-100' : 'opacity-0'}`}
+        className={cn(
+          "controls-overlay absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/30 transition-opacity duration-300",
+          isFullscreen ? "z-40" : "",
+          isControlsVisible ? "opacity-100" : "opacity-0 pointer-events-none"
+        )}
       >
         {/* Top Bar with Title */}
         <VideoTitle title={title} />

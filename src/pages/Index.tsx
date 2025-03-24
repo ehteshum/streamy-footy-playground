@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Layout from '@/components/Layout';
 import VideoPlayer from '@/components/VideoPlayer';
@@ -7,7 +6,7 @@ import RecentStreams from '@/components/RecentStreams';
 import { useStreamHistory, type StreamEntry } from '@/hooks/useStreamHistory';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { toast } from '@/components/ui/sonner';
+import { toast } from '@/lib/toast';
 
 const Index = () => {
   const [currentStream, setCurrentStream] = useState<string | null>(null);

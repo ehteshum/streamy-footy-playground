@@ -11,7 +11,7 @@ export interface StreamData {
 export const predefinedStreams: StreamData[] = [
   {
     id: "premier-league-1",
-    url: "http://103.179.25.147:8181/IPLT20/index.m3u8",
+    url: "https://stream.live12.ir/hls2/ssc1.m3u8",
     title: "T-Sports",
     league: "Premier League",
     description: "English Premier League match"

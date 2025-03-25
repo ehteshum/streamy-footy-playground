@@ -14,16 +14,16 @@ export const predefinedStreams: StreamData[] = [
     url: "https://live-test.tsports.com/live-02/1080/master_1080p.m3u8",
     title: "T-Sports",
     league: "Premier League",
-    description: "English Premier League match"
+    description: "Testing"
   },
-  /*{
-    id: "la-liga-1",
-    url: "https://example.com/stream2.m3u8",
+  {
+    id: "tsports",
+    url: "https://live-test.tsports.com/live-02/1080/master_1080p.m3u8",
     title: "La Liga: Barcelona vs Real Madrid",
     league: "La Liga",
     description: "Spanish La Liga El Clasico"
   },
-  {
+  /*{
     id: "bundesliga-1",
     url: "https://example.com/stream3.m3u8",
     title: "Bundesliga: Bayern Munich vs Borussia Dortmund",

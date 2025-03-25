@@ -15,6 +15,8 @@ interface VideoPlayerProps {
 
 const VideoPlayer: React.FC<VideoPlayerProps> = ({ streamUrl, title, className }) => {
   const [showDiagnostics, setShowDiagnostics] = useState(false);
+  // Add our own controls visibility state to override the one from useVideoPlayer
+  const [localControlsVisible, setLocalControlsVisible] = useState(true);
   
   const {
     videoRef,
@@ -27,7 +29,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ streamUrl, title, className }
     duration,
     isBuffering,
     isError,
-    isControlsVisible,
+    isControlsVisible: hookControlsVisible,
     togglePlay,
     toggleMute,
     handleVolumeChange,
@@ -35,9 +37,70 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ streamUrl, title, className }
     toggleFullscreen,
     togglePictureInPicture,
     formatTime,
-    handleUserInteraction
+    handleUserInteraction: originalHandleUserInteraction
   } = useVideoPlayer(streamUrl);
 
+  // Computed controls visibility based on both states
+  const isControlsVisible = isFullscreen ? localControlsVisible : hookControlsVisible;
+
+  // Custom user interaction handler
+  const handleUserInteraction = () => {
+    // Call the original handler from the hook
+    originalHandleUserInteraction();
+    
+    // Also update our local state
+    setLocalControlsVisible(true);
+  };
+  
+  // Handle auto-hiding controls in fullscreen mode with a proper useEffect
+  useEffect(() => {
+    let timeoutId: number | null = null;
+    
+    if (isFullscreen && localControlsVisible) {
+      // Set a timeout to hide controls
+      timeoutId = window.setTimeout(() => {
+        setLocalControlsVisible(false);
+      }, 2000);
+    }
+    
+    // Cleanup function
+    return () => {
+      if (timeoutId !== null) {
+        window.clearTimeout(timeoutId);
+      }
+    };
+  }, [isFullscreen, localControlsVisible]);
+  
+  // Effect to handle fullscreen changes
+  useEffect(() => {
+    // When fullscreen is toggled on, hide the controls immediately
+    if (isFullscreen) {
+      // Force hide controls when entering fullscreen
+      setLocalControlsVisible(false);
+    } else {
+      // Show controls when exiting fullscreen
+      setLocalControlsVisible(true);
+    }
+  }, [isFullscreen]);
+  
+  // Add listener for custom hidecontrols event
+  useEffect(() => {
+    const container = document.getElementById('video-container');
+    if (!container) return;
+    
+    const handleHideControls = () => {
+      setLocalControlsVisible(false);
+    };
+    
+    // Add event listener for our custom event
+    container.addEventListener('hidecontrols', handleHideControls);
+    
+    // Cleanup
+    return () => {
+      container.removeEventListener('hidecontrols', handleHideControls);
+    };
+  }, []);
+  
   // Add keyboard shortcut for diagnostics
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -55,6 +118,16 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ streamUrl, title, className }
   // Double click handler for fullscreen toggle
   const handleDoubleClick = () => {
     toggleFullscreen();
+  };
+
+  // Custom fullscreen handler that ensures controls hide
+  const handleFullscreenToggle = () => {
+    toggleFullscreen();
+    
+    // If entering fullscreen, immediately hide controls
+    if (!isFullscreen) {
+      setLocalControlsVisible(false);
+    }
   };
 
   // Adapters for VideoControls component
@@ -75,7 +148,9 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ streamUrl, title, className }
         className
       )}
       onMouseMove={handleUserInteraction}
+      onMouseLeave={isFullscreen ? () => setLocalControlsVisible(false) : undefined}
       onTouchStart={handleUserInteraction}
+      onTouchMove={handleUserInteraction}
     >
       {/* Video Element */}
       <video
@@ -103,7 +178,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ streamUrl, title, className }
       )}
       
       {/* Play button overlay when paused */}
-      {!isPlaying && !isBuffering && !isError && (
+      {!isPlaying && !isBuffering && !isError && isControlsVisible && (
         <div 
           className="absolute inset-0 flex items-center justify-center cursor-pointer z-20" 
           onClick={togglePlay}
@@ -139,7 +214,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ streamUrl, title, className }
           toggleMute={toggleMute}
           handleVolumeChange={handleVolumeChangeAdapter}
           handleSeek={handleSeekAdapter}
-          toggleFullscreen={toggleFullscreen}
+          toggleFullscreen={handleFullscreenToggle}
           togglePictureInPicture={togglePictureInPicture}
           formatTime={formatTime}
         />
@@ -150,7 +225,10 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ streamUrl, title, className }
       
       {/* Buffering indicator */}
       {isBuffering && (
-        <div className="absolute inset-0 flex items-center justify-center z-30 bg-black/30">
+        <div className={cn(
+          "absolute inset-0 flex items-center justify-center z-30 bg-black/30",
+          isFullscreen && !isControlsVisible ? "opacity-0" : "opacity-100"
+        )}>
           <Spinner className="w-10 h-10" />
         </div>
       )}

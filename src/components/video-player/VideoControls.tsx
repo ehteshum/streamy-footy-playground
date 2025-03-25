@@ -35,6 +35,22 @@ const VideoControls: React.FC<VideoControlsProps> = ({
   togglePictureInPicture,
   formatTime
 }) => {
+  // Add a function to help hide controls when in fullscreen
+  const hideControls = () => {
+    if (isFullscreen) {
+      // Try to find the video container and dispatch an event
+      const container = document.getElementById('video-container');
+      if (container) {
+        // Create a custom event that we can listen for
+        const event = new CustomEvent('hidecontrols', {
+          bubbles: true,
+          cancelable: true
+        });
+        container.dispatchEvent(event);
+      }
+    }
+  };
+
   return (
     <div className={cn(
       "absolute bottom-0 left-0 right-0 p-4 flex flex-col gap-2 z-10",
@@ -162,18 +178,9 @@ const VideoControls: React.FC<VideoControlsProps> = ({
               size="icon" 
               className={cn(
                 "text-white hover:bg-white/10 rounded-full", 
-                "p-2",
-                "animate-pulse" // Add attention-grabbing animation
+                "p-2"
               )}
-              onClick={() => {
-                // Just trigger a click outside to hide controls
-                const event = new MouseEvent('click', {
-                  bubbles: true,
-                  cancelable: true,
-                  view: window
-                });
-                document.dispatchEvent(event);
-              }}
+              onClick={hideControls}
             >
               <span className="sr-only">Hide Controls</span>
               <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

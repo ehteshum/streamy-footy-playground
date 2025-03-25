@@ -184,16 +184,15 @@ export const useVideoPlayer = (streamUrl: string) => {
       // Enter fullscreen
       container.requestFullscreen().then(() => {
         setIsFullscreen(true);
-        setIsControlsVisible(true);
         
-        // Hide controls after a delay
+        // Hide controls immediately when entering fullscreen
+        setIsControlsVisible(false);
+        
+        // Clear any existing timer
         if (controlsTimerRef.current) {
           window.clearTimeout(controlsTimerRef.current);
+          controlsTimerRef.current = null;
         }
-        
-        controlsTimerRef.current = window.setTimeout(() => {
-          setIsControlsVisible(false);
-        }, 3000);
       }).catch((error) => {
         console.error('Error entering fullscreen:', error);
       });
@@ -202,6 +201,12 @@ export const useVideoPlayer = (streamUrl: string) => {
       document.exitFullscreen().then(() => {
         setIsFullscreen(false);
         setIsControlsVisible(true);
+        
+        // Clear any existing timers
+        if (controlsTimerRef.current) {
+          window.clearTimeout(controlsTimerRef.current);
+          controlsTimerRef.current = null;
+        }
       }).catch((error) => {
         console.error('Error exiting fullscreen:', error);
       });
@@ -238,22 +243,46 @@ export const useVideoPlayer = (streamUrl: string) => {
     setIsControlsVisible(true);
     setIsUserInteracting(true);
     
+    // Clear any existing timer
     if (controlsTimerRef.current) {
       window.clearTimeout(controlsTimerRef.current);
     }
     
+    // Set a new timer to hide controls
     controlsTimerRef.current = window.setTimeout(() => {
+      // Only hide controls in fullscreen mode if user is not interacting
       if (isFullscreen && !isUserInteracting) {
         setIsControlsVisible(false);
       }
       setIsUserInteracting(false);
-    }, isFullscreen ? 3000 : 5000);
+    }, isFullscreen ? 2000 : 5000); // Shortened delay for fullscreen mode
   };
 
   // Monitor fullscreen changes
   useEffect(() => {
     const handleFullscreenChange = () => {
-      setIsFullscreen(Boolean(document.fullscreenElement));
+      const isInFullscreen = Boolean(document.fullscreenElement);
+      setIsFullscreen(isInFullscreen);
+      
+      // If exiting fullscreen, ensure controls are visible
+      if (!isInFullscreen) {
+        setIsControlsVisible(true);
+        
+        // Clear any existing hide timer
+        if (controlsTimerRef.current) {
+          window.clearTimeout(controlsTimerRef.current);
+          controlsTimerRef.current = null;
+        }
+      } else {
+        // Hide controls immediately when entering fullscreen
+        setIsControlsVisible(false);
+        
+        // Clear any existing timer
+        if (controlsTimerRef.current) {
+          window.clearTimeout(controlsTimerRef.current);
+          controlsTimerRef.current = null;
+        }
+      }
     };
     
     document.addEventListener('fullscreenchange', handleFullscreenChange);

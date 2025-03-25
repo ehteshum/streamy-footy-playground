@@ -23,13 +23,13 @@ export const predefinedStreams: StreamData[] = [
     league: "La Liga",
     description: "Bangladesh vs India"
   },
- /* {
+  {
     id: "bundesliga-1",
-    url: "https://example.com/stream3.m3u8",
-    title: "Bundesliga: Bayern Munich vs Borussia Dortmund",
+    url: "https://nix1-dc4-cdnnew.koskoros.ru/nix1-dc4-cdn/mono40/mono.m3u8",
+    title: "Argentina Vs Brazil -2",
     league: "Bundesliga",
-    description: "German Bundesliga Der Klassiker"
-  }*/
+    description: ""
+  }
 ];
 
 // Function to get all available streams

@@ -11,7 +11,7 @@ export interface StreamData {
 export const predefinedStreams: StreamData[] = [
   {
     id: "premier-league-1",
-    url: "https://live-test.tsports.com/live-02/1080/master_1080p.m3u8",
+    url: "https://bldcmprod-cdn.toffeelive.com/cdn/live/sports_highlights/playlist.m3u8",
     title: "T-Sports",
     league: "Premier League",
     description: "Testing"

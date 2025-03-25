@@ -11,14 +11,14 @@ export interface StreamData {
 export const predefinedStreams: StreamData[] = [
   {
     id: "premier-league-1",
-    url: "https://live.tsports.com/mobile_hls/tsports_live_2/playlist.m3u8",
+    url: "https://live.tsports.com/mobile_hls/tsports_live_1/playlist.m3u8",
     title: "BD VS IND",
     league: "Premier League",
     description: "Bangladesh vs India"
   },
   {
     id: "Sony Aath",
-    url: "https://live.tsports.com/mobile_hls/tsports_live_1/playlist.m3u8",
+    url: "https://live.tsports.com/mobile_hls/tsports_live_2/playlist.m3u8",
     title: "BD VS IND - 2",
     league: "La Liga",
     description: "Bangladesh vs India"

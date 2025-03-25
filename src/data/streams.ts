@@ -17,8 +17,8 @@ export const predefinedStreams: StreamData[] = [
     description: "Testing"
   },
   {
-    id: "tsports",
-    url: "https://live-test.tsports.com/live-02/1080/master_1080p.m3u8",
+    id: "Sony Aath",
+    url: "https://bldcmprod-cdn.toffeelive.com/cdn/live/sonyaath/playlist.m3u8",
     title: "La Liga: Barcelona vs Real Madrid",
     league: "La Liga",
     description: "Spanish La Liga El Clasico"

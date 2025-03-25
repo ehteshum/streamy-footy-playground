@@ -18,7 +18,7 @@ export const predefinedStreams: StreamData[] = [
   },
   {
     id: "Sony Aath",
-    url: "https://bldcmprod-cdn.toffeelive.com/cdn/live/sonyaath/playlist.m3u8",
+    url: "https://bldcmprod-cdn.toffeelive.com/cdn/live/sports_highlights/playlist.m3u8",
     title: "Sony Aath",
     league: "La Liga",
     description: "Spanish La Liga El Clasico"

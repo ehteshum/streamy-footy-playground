@@ -18,7 +18,7 @@ export const predefinedStreams: StreamData[] = [
   },
   {
     id: "Sony Aath",
-    url: "https://dokko1new.koskoros.ru/dokko1/premium270/mono.m3u8",
+    url: "https://live-test.tsports.com/live-01/master_480.m3u8?hdntl=Expires=1742996874~_GO=Generated~URLPrefix=aHR0cHM6Ly9saXZlLXRlc3QudHNwb3J0cy5jb20v~Signature=AXH73bb41230MDxlnngSsmBZoonAidwSTpjbrBmi8yiF_bTkbPaCW61aO60zirW7TacRgATW0Okpy7psP1ogO-LIOskF",
     title: "BD VS IND - 2",
     league: "La Liga",
     description: "Bangladesh vs India"

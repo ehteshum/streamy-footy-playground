@@ -11,19 +11,19 @@ export interface StreamData {
 export const predefinedStreams: StreamData[] = [
   {
     id: "premier-league-1",
-    url: "https://bldcmprod-cdn.toffeelive.com/cdn/live/sports_highlights/playlist.m3u8",
-    title: "T-Sports",
+    url: "https://live.tsports.com/mobile_hls/tsports_live_2/playlist.m3u8",
+    title: "BD VS IND",
     league: "Premier League",
-    description: "Testing"
+    description: "Bangladesh vs India"
   },
-  {
+ /* {
     id: "Sony Aath",
     url: "https://bldcmprod-cdn.toffeelive.com/cdn/live/sports_highlights/playlist.m3u8",
     title: "Sony Aath",
     league: "La Liga",
     description: "Spanish La Liga El Clasico"
   },
-  /*{
+  {
     id: "bundesliga-1",
     url: "https://example.com/stream3.m3u8",
     title: "Bundesliga: Bayern Munich vs Borussia Dortmund",

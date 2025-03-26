@@ -32,10 +32,10 @@ export const predefinedStreams: StreamData[] = [
   },
 {
     id: "premier-league-2",
-    url: "https://stream.sainaertebat.com/hls2/ssc1.m3u8",
-    title: "Argentina Vs Brazil -3 (better q)",
+    url: "https://24a.pricesaskeloadsc.com/skycricket/index.m3u8?token=4fcea732d440d1af4ed0d7269be1b4c634d4f807-24-1743035411-1743003011",
+    title: "Sky Sports HD",
     league: "Premier Leae",
-    description: "Argentina Vs Brazil"
+    description: ""
   }
 ];
 

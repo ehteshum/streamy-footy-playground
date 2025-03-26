@@ -12,7 +12,7 @@ export const predefinedStreams: StreamData[] = [
   {
     id: "Star Sports 1 ",
     url: "https://9361edfe-185f-40b2-8656-2f450faeef7c.deepnoteproject.com/api/star1in.m3u8",
-    title: "Star Sports 1",
+    title: "IPL -Star Sports 1",
     league: "Premier League",
     description: ""
   },

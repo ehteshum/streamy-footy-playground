@@ -25,8 +25,8 @@ export const predefinedStreams: StreamData[] = [
   },
   {
     id: "bundesliga-1",
-    url: "https://nix1-dc4-cdnnew.koskoros.ru/nix1-dc4-cdn/mono40/mono.m3u8",
-    title: "Argentina Vs Brazil -2",
+    url: "https://xhls.embedxt.site/hls/live.mpd",
+    title: "IPL - Test",
     league: "Bundesliga",
     description: ""
   },

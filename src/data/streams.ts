@@ -10,11 +10,11 @@ export interface StreamData {
 // Predefined streams
 export const predefinedStreams: StreamData[] = [
   {
-    id: "premier-league-1",
-    url: "https://nix1-dc4-cdnnew.koskoros.ru/nix1-dc4-cdn/mono41/mono.m3u8",
+    id: "Star Sports 1 ",
+    url: "https://9361edfe-185f-40b2-8656-2f450faeef7c.deepnoteproject.com/api/star1in.m3u8",
     title: "Argentina Vs Brazil",
     league: "Premier League",
-    description: "Argentina Vs Brazil"
+    description: ""
   },
   {
     id: "Sony Aath",

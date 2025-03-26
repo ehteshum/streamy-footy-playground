@@ -29,6 +29,13 @@ export const predefinedStreams: StreamData[] = [
     title: "Argentina Vs Brazil -2",
     league: "Bundesliga",
     description: ""
+  },
+{
+    id: "premier-league-1",
+    url: "https://stream.sainaertebat.com/hls2/ssc1.m3u8",
+    title: "Argentina Vs Brazil -3 (better q)",
+    league: "Premier League",
+    description: "Argentina Vs Brazil"
   }
 ];
 

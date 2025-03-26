@@ -25,10 +25,10 @@ export const predefinedStreams: StreamData[] = [
   },
   {
     id: "bundesliga-1",
-    url: "https://xhls.embedxt.site/hls/live.mpd",
+    url: "https://zekonew.koskoros.ru/zeko/premium370/mono.m3u8",
     title: "IPL - Test",
     league: "Bundesliga",
-    description: ""
+    description: "test"
   },
 {
     id: "premier-league-2",

@@ -25,7 +25,7 @@ export const predefinedStreams: StreamData[] = [
   },
   {
     id: "bundesliga-1",
-    url: "https://zekonew.koskoros.ru/zeko/premium370/mono.m3u8",
+    url: "https://love2live.wideiptv.top/DSTVCRICKET/index.fmp4.m3u8?token=42e2e4ed8519acfe582433a9714ee8263082abb3-59b9ec75ffc76070294e8e751d0d391c-1743022318-1743011518",
     title: "IPL - Test",
     league: "Bundesliga",
     description: "test"

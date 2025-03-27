@@ -1,10 +1,10 @@
-
 export interface StreamData {
   id: string;
   url: string;
   title: string;
   league?: string;
   description?: string;
+  isEmbedded?: boolean;
 }
 
 // Predefined streams
@@ -30,12 +30,20 @@ export const predefinedStreams: StreamData[] = [
     league: "Bundesliga",
     description: "test"
   },
-{
+  {
     id: "premier-league-2",
     url: "https://24a.pricesaskeloadsc.com/skycricket/index.m3u8?token=4fcea732d440d1af4ed0d7269be1b4c634d4f807-24-1743035411-1743003011",
     title: "Sky Sports HD",
     league: "Premier Leae",
     description: ""
+  },
+  {
+    id: "stream-415",
+    url: "https://stream2wetch.top/embed/stream-415.php",
+    title: "Stream 415",
+    league: "Football",
+    description: "Featured football stream",
+    isEmbedded: true
   }
 ];
 

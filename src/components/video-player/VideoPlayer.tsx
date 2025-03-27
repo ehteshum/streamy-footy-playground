@@ -6,6 +6,7 @@ import VideoTitle from './VideoTitle';
 import DiagnosticOverlay from './DiagnosticOverlay';
 import { cn } from '@/lib/utils';
 import Spinner from '../Spinner';
+import EmbeddedPlayer from './EmbeddedPlayer';
 
 interface VideoPlayerProps {
   streamUrl: string;
@@ -13,7 +14,27 @@ interface VideoPlayerProps {
   className?: string;
 }
 
-const VideoPlayer: React.FC<VideoPlayerProps> = ({ streamUrl, title, className }) => {
+const VideoPlayer = ({ streamUrl, title, className }: VideoPlayerProps) => {
+  // Check if the URL is an embed URL that should use the EmbeddedPlayer
+  const isEmbeddedStream = streamUrl.includes('embed') || 
+                           streamUrl.endsWith('.php') || 
+                           streamUrl.includes('stream2wetch.top') ||
+                           // Get the stream data from available streams
+                           (() => {
+                             try {
+                               const urlObj = new URL(streamUrl);
+                               return urlObj.searchParams.get('isEmbedded') === 'true';
+                             } catch (e) {
+                               return false;
+                             }
+                           })();
+  
+  // If it's an embedded stream, use the EmbeddedPlayer component
+  if (isEmbeddedStream) {
+    return <EmbeddedPlayer streamUrl={streamUrl} title={title} className={className} />;
+  }
+
+  // Regular video player logic for direct streams
   const [showDiagnostics, setShowDiagnostics] = useState(false);
   // Add our own controls visibility state to override the one from useVideoPlayer
   const [localControlsVisible, setLocalControlsVisible] = useState(true);

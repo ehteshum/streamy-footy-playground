@@ -36,15 +36,15 @@ export const predefinedStreams: StreamData[] = [
     title: "Sky Sports HD",
     league: "Premier Leae",
     description: ""
-  },
+  },*/
   {
     id: "stream-415",
-    url: "https://stream2wetch.top/embed/stream-415.php",
+    url: "https://embedme.top/embed/alpha/barcelona-vs-osasuna/2",
     title: "T",
     league: "Football",
     description: "Featured football stream",
     isEmbedded: true
-  }*/
+  }
 ];
 
 // Function to get all available streams

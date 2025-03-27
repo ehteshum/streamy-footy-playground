@@ -18,7 +18,7 @@ export const predefinedStreams: StreamData[] = [
   },
   {
     id: "Sony Aath",
-    url: "https://director.taihotel.asia/v3/director/VE1NDRkMGVjY2U4OWFlLTFiODgtMzc1NC04NWZhLTI1YzkwMWVl/master.m3u8?md5=zv0KAjO3bvXEpWPy0WkjZA&expires=1743148500&ddg=1",
+    url: "https://director.taihotel.asia/v4/variant/VE1gTdz0mLzRnLv52bt9SMhFjdtM3ajFmc09CN0QGMlN2YlhTOhVWLxIGO40yM3UDNtgTNmFWLyUzY5ATMlV2L.m3u8",
     title: "Barcelona Vs Osasuna",
     league: "La Liga",
     description: ""

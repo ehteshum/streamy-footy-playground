@@ -9,7 +9,7 @@ export interface StreamData {
 
 // Predefined streams
 export const predefinedStreams: StreamData[] = [
-  {
+ /* {
     id: "Star Sports 1 ",
     url: "https://9361edfe-185f-40b2-8656-2f450faeef7c.deepnoteproject.com/api/star1in.m3u8",
     title: "IPL -Star Sports 1",
@@ -36,11 +36,11 @@ export const predefinedStreams: StreamData[] = [
     title: "Sky Sports HD",
     league: "Premier Leae",
     description: ""
-  },
+  },*/
   {
     id: "stream-415",
     url: "https://stream2wetch.top/embed/stream-415.php",
-    title: "Stream 415",
+    title: "Barcelona vs Osasuna",
     league: "Football",
     description: "Featured football stream",
     isEmbedded: true

@@ -39,8 +39,8 @@ export const predefinedStreams: StreamData[] = [
   },*/
   {
     id: "stream-415",
-    url: "https://embedme.top/embed/alpha/barcelona-vs-osasuna/2",
-    title: "T",
+    url: "https://embedme.top/embed/admin/admin-barcelona-vs-osasuna/1",
+    title: "Barca VS Osasuna HD (ADS)",
     league: "Football",
     description: "Featured football stream",
     isEmbedded: true

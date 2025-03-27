@@ -11,7 +11,7 @@ export interface StreamData {
 export const predefinedStreams: StreamData[] = [
   {
     id: "Star Sports 1 ",
-    url: "https://live.tsports.com/mobile_hls/tsports_live_2/playlist.m3u8",
+    url: "https://smart.bengaldigital.live/T-Sports_HD/index.m3u8",
     title: "T Sports",
     league: "Premier League",
     description: ""

@@ -23,20 +23,20 @@ export const predefinedStreams: StreamData[] = [
     league: "La Liga",
     description: ""
   },
-/*  {
+  {
     id: "bundesliga-1",
-    url: "https://love2live.wideiptv.top/DSTVCRICKET/index.fmp4.m3u8?token=42e2e4ed8519acfe582433a9714ee8263082abb3-59b9ec75ffc76070294e8e751d0d391c-1743022318-1743011518",
-    title: "IPL - Test",
+    url: "https://top1-cdnnew.newkso.ru/top1-cdn/rkwC7xgQZu/mono.m3u8 ",
+    title: "Barcelona vs Atm -2",
     league: "Bundesliga",
     description: "test"
   },
-  {
+ /* {
     id: "premier-league-2",
     url: "https://24a.pricesaskeloadsc.com/skycricket/index.m3u8?token=4fcea732d440d1af4ed0d7269be1b4c634d4f807-24-1743035411-1743003011",
     title: "Sky Sports HD",
     league: "Premier Leae",
     description: ""
-  },*/
+  },
   {
     id: "stream-415",
     url: "https://embedme.top/embed/admin/admin-barcelona-vs-osasuna/1",
@@ -44,7 +44,7 @@ export const predefinedStreams: StreamData[] = [
     league: "Football",
     description: "Featured football stream",
     isEmbedded: true
-  }
+  }*/
 ];
 
 // Function to get all available streams

@@ -18,8 +18,8 @@ export const predefinedStreams: StreamData[] = [
   },
   {
     id: "Sony Aath",
-    url: "https://director.taihotel.asia/v4/variant/VE1gTdz0mLzRnLv52bt9SMhFjdtM3ajFmc09CN0QGMlN2YlhTOhVWLxIGO40yM3UDNtgTNmFWLyUzY5ATMlV2L.m3u8",
-    title: "Barcelona Vs Osasuna",
+    url: "https://x4-cdnnew.newkso.ru/x4-cdn/mono41/mono.m3u8",
+    title: "Barcelona Vs Athletico",
     league: "La Liga",
     description: ""
   },

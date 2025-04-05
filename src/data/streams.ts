@@ -11,7 +11,7 @@ export interface StreamData {
 export const predefinedStreams: StreamData[] = [
   {
     id: "Star Sports 1 ",
-    url: "https://hello.thepotatosman.xyz/hls/0/stream.m3u8",
+    url: "https://top1-cdnnew.newkso.ru/top1-cdn/W0svhc8oj7/mono.m3u8",
     title: "Barcelona Vs Real Betis",
     league: "Premier League",
     description: ""

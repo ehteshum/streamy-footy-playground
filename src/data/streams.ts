@@ -16,7 +16,7 @@ export const predefinedStreams: StreamData[] = [
     league: "Premier League",
     description: ""
   },
-  {
+ /* {
     id: "Sony Aath",
     url: "https://x4-cdnnew.newkso.ru/x4-cdn/mono41/mono.m3u8",
     title: "Barcelona Vs Athletico",
@@ -30,7 +30,7 @@ export const predefinedStreams: StreamData[] = [
     league: "Bundesliga",
     description: "test"
   },
- /* {
+  {
     id: "premier-league-2",
     url: "https://24a.pricesaskeloadsc.com/skycricket/index.m3u8?token=4fcea732d440d1af4ed0d7269be1b4c634d4f807-24-1743035411-1743003011",
     title: "Sky Sports HD",

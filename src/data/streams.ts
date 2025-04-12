@@ -11,7 +11,7 @@ export interface StreamData {
 export const predefinedStreams: StreamData[] = [
   {
     id: "Star Sports 1 ",
-    url: "https://director.chinese-restaurant-api.site/v3/director/VE1Y2FjNzUyNzFmZWFkLTcxYTktYTU3NC1kMGY3LTE5MDBjNmQ5/master.m3u8?md5=6arT3087aWn0P_9SwaRGVw&expires=1744526771",
+    url: "https://x4-cdnnew.newkso.ru/x4-cdn/mono6/mono.m3u8",
     title: "Barcelona Vs Leganes",
     league: "Premier League",
     description: ""

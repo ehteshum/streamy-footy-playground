@@ -11,8 +11,8 @@ export interface StreamData {
 export const predefinedStreams: StreamData[] = [
   {
     id: "Star Sports 1 ",
-    url: "https://a2uy.short.gy/BAY-V-INT/TG@ZubayerOp_Official.m3u8",
-    title: "Barcelona Vs Real Betis",
+    url: "https://director.chinese-restaurant-api.site/v3/director/VE1Y2FjNzUyNzFmZWFkLTcxYTktYTU3NC1kMGY3LTE5MDBjNmQ5/master.m3u8?md5=6arT3087aWn0P_9SwaRGVw&expires=1744526771",
+    title: "Barcelona Vs Leganes",
     league: "Premier League",
     description: ""
   },

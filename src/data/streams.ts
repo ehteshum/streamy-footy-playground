@@ -11,8 +11,8 @@ export interface StreamData {
 export const predefinedStreams: StreamData[] = [
   {
     id: "Star Sports 1 ",
-    url: "https://1a-1791.com/live/3fms19g4/slot-137/g5d5-xw6u_720p/chunklist_DVR.m3u8",
-    title: "Barcelona Vs Real Madrid",
+    url: "https://1.thepotatosman.xyz/hls/0/stream.m3u8",
+    title: "Arsenal Vs PSG",
     league: "Premier League",
     description: ""
   },

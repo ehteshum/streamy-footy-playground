@@ -11,7 +11,7 @@ export interface StreamData {
 export const predefinedStreams: StreamData[] = [
   {
     id: "Star Sports 1 ",
-    url: "https://c58bx6vat7sxiexj.freshsoup.shop/v3/director/VE1Y2FjNzUyNzFmZWFkLTcxYTktYTU3NC1kMGY3LTE5MDBjNmQ5/master.m3u8?md5=FGrt-u53pt3XP-c6X6HPrg&expires=1746340699",
+    url: "https://storage.googleapis.com/overtringsret1/mux_video_ts/index-1.m3u8",
     title: "Barca vs Real Valladolid",
     league: "Premier League",
     description: ""

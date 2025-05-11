@@ -11,8 +11,8 @@ export interface StreamData {
 export const predefinedStreams: StreamData[] = [
   {
     id: "Star Sports 1 ",
-    url: "https://storage.googleapis.com/overtringsret1/mux_video_ts/index-1.m3u8",
-    title: "Barca vs Real Valladolid",
+    url: "https://love2live.wideiptv.top/DAZN2DE/index.fmp4.m3u8?token=d0ba1d2c3544b29e0350b957288037edc7d4c557-b58b4417a3a1385d8918b77108a789b4-1746982080-1746971280",
+    title: "Barca vs Real ",
     league: "Premier League",
     description: ""
   },
